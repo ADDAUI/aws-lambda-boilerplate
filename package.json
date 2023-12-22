@@ -1,0 +1,24 @@
+{
+  "name": "online-store-identifier",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": ". ./.env.sh && npm run build && node -e 'require(\"./dist/index\").handler()'",
+    "clean": "rm -rf ./dist",
+    "dev": "ts-node ./index.ts",
+    "lint": "eslint . --ext .ts",
+    "build": "npm run clean && tsc",
+    "deploy": "npm run build && zip -j code.zip ./dist/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.130",
+    "@types/node": "^20.10.5",
+    "aws-lambda": "^1.0.7",
+    "eslint": "^8.56.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

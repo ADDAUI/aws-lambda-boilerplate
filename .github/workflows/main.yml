@@ -1,0 +1,36 @@
+name: deploy to lambda
+on:
+  push:
+    branches:
+      - dev
+      - prod
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DEV_AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+      DEV_AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+      PROD_AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+      PROD_AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Compile TypeScript
+        run: npm run deploy
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+      - name: Configure AWS credentials and deploy
+        run: |
+          if [ "$GITHUB_REF" == "refs/heads/dev" ]; then
+            aws configure set aws_access_key_id $DEV_AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $DEV_AWS_SECRET_ACCESS_KEY
+            aws lambda update-function-code --region $DEV_AWS_REGION --function-name $FUNCTION_NAME --zip-file fileb://code.zip
+          elif [ "$GITHUB_REF" == "refs/heads/prod" ]; then
+            aws configure set aws_access_key_id $PROD_AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $PROD_AWS_SECRET_ACCESS_KEY
+            aws lambda update-function-code --region $PROD_AWS_REGION --function-name $FUNCTION_NAME --zip-file fileb://code.zip
+          fi
